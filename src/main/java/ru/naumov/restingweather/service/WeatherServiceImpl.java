@@ -17,7 +17,7 @@ import ru.naumov.restingweather.repository.WeatherRepository;
 import java.net.URI;
 
 @Service
-public class WeatherServiceImpl {
+public class WeatherServiceImpl implements WeatherService{
 
     private final String WEATHER_URL = "http://api.openweathermap.org/data/2.5/weather?q={city}&appid={key}&units=metric&lang=ru";
 
