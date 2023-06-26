@@ -19,10 +19,17 @@ import java.net.*;
 public class WeatherServiceImpl implements WeatherService {
 
     @Value("${api.openweathermap.url}")
-    private String WEATHER_URL;
+    private String OPEN_WEATHER_URL;
 
     @Value("${api.openweathermap.key}")
-    private String apiKey;
+    private String OPEN_WEATHER_KEY;
+
+    @Value("${api.weatherapi.url}")
+    private String WEATHER_API_URL;
+
+    @Value("${api.weatherapi.key}")
+    private String WEATHER_API_KEY;
+
 
     private final RestTemplate restTemplate;
 
@@ -37,17 +44,28 @@ public class WeatherServiceImpl implements WeatherService {
         this.repository = repository;
     }
 
-    public Weather getWeatherByCity(String city) throws Exception {
+    public Weather getOpenWeatherByCity(String city) throws Exception {
         if (isCity(city)) {
-            URI url = new UriTemplate(WEATHER_URL).expand(city, apiKey);
+            URI url = new UriTemplate(OPEN_WEATHER_URL).expand(city, OPEN_WEATHER_KEY);
             ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
-            return repository.save(convert(response));
+            return repository.save(convertOpenWeather(response));
         } else {
             throw new HttpMessageNotReadableException("City not exist");
         }
     }
 
-    private Weather convert(ResponseEntity<String> response) {
+    public Weather getWeatherAlternativeByCity(String city) throws Exception {
+        if (isCity(city)) {
+            URI url = new UriTemplate(WEATHER_API_URL).expand(WEATHER_API_KEY, city);
+            ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
+            return repository.save(convertWeatherApi(response));
+
+        }else {
+            throw new HttpMessageNotReadableException("City not exist");
+        }
+    }
+
+    private Weather convertOpenWeather(ResponseEntity<String> response) {
         try {
             JsonNode root = objectMapper.readTree(response.getBody());
             Weather weather = new Weather();
@@ -61,8 +79,22 @@ public class WeatherServiceImpl implements WeatherService {
         }
     }
 
-    public boolean isCity(String city) throws Exception{
-        URL weatherApiUrl = new URL(WEATHER_URL.replace("{city}", city).replace("{key}", apiKey));
+    private Weather convertWeatherApi(ResponseEntity<String> response) {
+        try {
+            JsonNode root = objectMapper.readTree(response.getBody());
+            Weather weather = new Weather();
+            weather.setCity(root.path("location").path("name").asText());
+            weather.setLongitude(root.path("location").path("lon").asDouble());
+            weather.setLatitude(root.path("location").path("lat").asDouble());
+            weather.setTemperature(root.path("current").path("temp_c").asDouble());
+            return weather;
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Error parsing JSON", e);
+        }
+    }
+
+    public boolean isCity(String city) throws Exception {
+        URL weatherApiUrl = new URL(OPEN_WEATHER_URL.replace("{city}", city).replace("{key}", OPEN_WEATHER_KEY));
         HttpURLConnection weatherApiConnection = (HttpURLConnection) weatherApiUrl.openConnection();
         weatherApiConnection.setRequestMethod("GET");
         weatherApiConnection.connect();

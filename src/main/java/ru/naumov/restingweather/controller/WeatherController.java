@@ -15,8 +15,11 @@ public class WeatherController {
     private final WeatherService weatherService;
 
     @GetMapping("/weather/openweather/{city}")
-    public ResponseEntity<Weather> getWeatherByCity(@PathVariable(name = "city") String city) throws Exception {
-            return ResponseEntity.ok(weatherService.getWeatherByCity(city));
+    public ResponseEntity<Weather> getOpenWeatherByCity(@PathVariable(name = "city") String city) throws Exception {
+        return ResponseEntity.ok(weatherService.getOpenWeatherByCity(city));
     }
-
+    @GetMapping("/weather/weatherapi/{city}")
+    public ResponseEntity<Weather> getWeatherApiByCity(@PathVariable(name = "city") String city) throws Exception {
+        return ResponseEntity.ok(weatherService.getWeatherAlternativeByCity(city));
+    }
 }
