@@ -14,8 +14,9 @@ public class WeatherController {
 
     private final WeatherService weatherService;
 
-    @GetMapping("/weather/{city}")
+    @GetMapping("/weather/openweather/{city}")
     public ResponseEntity<Weather> getWeatherByCity(@PathVariable(name = "city") String city) throws Exception {
             return ResponseEntity.ok(weatherService.getWeatherByCity(city));
     }
+
 }
