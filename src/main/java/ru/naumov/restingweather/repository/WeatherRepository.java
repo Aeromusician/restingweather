@@ -6,4 +6,5 @@ import ru.naumov.restingweather.model.Weather;
 
 @Repository
 public interface WeatherRepository extends JpaRepository<Weather, Long> {
+
 }
