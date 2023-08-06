@@ -12,23 +12,27 @@ import java.io.Serializable;
 @Table(name = "weather")
 public class Weather implements Serializable {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @SequenceGenerator(name = "weather_seq",
+            sequenceName = "weather_seq",
+            initialValue = 1, allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "weather_seq")
     private Long id;
 
-    @Column(name = "city")
-    private String city;
+    @OneToOne(cascade = {CascadeType.ALL})
+    @JoinColumn(name = "city_id")
+    private City city;
 
-    @Column(name = "latitude")
-    private double latitude;
+//    @Column(name = "latitude")
+//    private double latitude;
+//
+//    @Column(name = "longitude")
+//    private double longitude;
 
-    @Column(name = "longitude")
-    private double longitude;
-
-    @Transient
+    @Column(name = "temperature")
     private double temperature;
 
     @Override
     public String toString() {
-        return "Температура в городе " + city + " : " + temperature + "°C";
+        return "Температура в городе " + city.getName() + " : " + temperature + "°C";
     }
 }
